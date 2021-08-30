@@ -969,6 +969,36 @@ class AAFReaderTests(unittest.TestCase):
 
         self._verify_user_comments(aaf_metadata, expected_md)
 
+    def test_aaf_sourcemob_usage(self):
+        """
+        Each clip stores it's source mob usage AAF value as metadata in`SourceMobUsage`.
+        For sub-clips this value should be `Usage_SubClip`.
+        """
+
+        # `Usage_SubClip` value
+        subclip_timeline = otio.adapters.read_from_file(SUBCLIP_PATH)
+        subclip_usages = {"Subclip.BREATH": "Usage_SubClip"}
+        for clip in subclip_timeline.each_clip():
+            self.assertEqual(
+                clip.metadata.get("AAF", {}).get("SourceMobUsage"),
+                subclip_usages[clip.name]
+            )
+
+        # no usage value
+        simple_timeline = otio.adapters.read_from_file(SIMPLE_EXAMPLE_PATH)
+        simple_usages = {
+            "KOLL-HD.mp4": "",
+            "brokchrd (loop)-HD.mp4": "",
+            "out-b (loop)-HD.mp4": "",
+            "t-hawk (loop)-HD.mp4": "",
+            "tech.fux (loop)-HD.mp4": ""
+        }
+        for clip in simple_timeline.each_clip():
+            self.assertEqual(
+                clip.metadata.get("AAF", {}).get("SourceMobUsage"),
+                simple_usages[clip.name]
+            )
+
     def test_aaf_composition_metadata(self):
         """
         For standard clips the AAF SourceClip can actually reference a
